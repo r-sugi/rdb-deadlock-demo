@@ -78,7 +78,7 @@ verifyRoutes.post("/patch-vs-bulk", async (c) => {
 
   async function runParallel(
     label: string,
-    bulkFn: () => ReturnType<typeof bulkDangerousTransaction>
+    bulkFn: () => ReturnType<typeof bulkDangerousTransaction>,
   ) {
     const bulkDelayed = async () => {
       if (delayBulkMs > 0) {
@@ -87,10 +87,7 @@ verifyRoutes.post("/patch-vs-bulk", async (c) => {
       return bulkFn();
     };
 
-    const settled = await Promise.allSettled([
-      patchHoldTransaction(),
-      bulkDelayed(),
-    ]);
+    const settled = await Promise.allSettled([patchHoldTransaction(), bulkDelayed()]);
 
     const patchSettled = settled[0];
     const bulkSettled = settled[1];
@@ -102,9 +99,9 @@ verifyRoutes.post("/patch-vs-bulk", async (c) => {
         deadlock: patchSettled.status === "rejected" && isDeadlockError(patchSettled.reason),
         error:
           patchSettled.status === "rejected"
-            ? (patchSettled.reason instanceof Error
-                ? patchSettled.reason.message
-                : String(patchSettled.reason))
+            ? patchSettled.reason instanceof Error
+              ? patchSettled.reason.message
+              : String(patchSettled.reason)
             : undefined,
       },
       bulk: {
@@ -112,9 +109,9 @@ verifyRoutes.post("/patch-vs-bulk", async (c) => {
         deadlock: bulkSettled.status === "rejected" && isDeadlockError(bulkSettled.reason),
         error:
           bulkSettled.status === "rejected"
-            ? (bulkSettled.reason instanceof Error
-                ? bulkSettled.reason.message
-                : String(bulkSettled.reason))
+            ? bulkSettled.reason instanceof Error
+              ? bulkSettled.reason.message
+              : String(bulkSettled.reason)
             : undefined,
       },
     };
@@ -170,10 +167,7 @@ verifyRoutes.post("/deadlock-ordering", async (c) => {
   const roomId = Number(body.roomId ?? 1);
   const txASleepMs = Number(body.txASleepMs ?? 200);
   const txBStartDelayMs = Number(body.txBStartDelayMs ?? 50);
-  const iterations = Math.min(
-    50,
-    Math.max(1, Math.floor(Number(body.iterations ?? 20)))
-  );
+  const iterations = Math.min(50, Math.max(1, Math.floor(Number(body.iterations ?? 20))));
 
   if (!Number.isFinite(roomId) || roomId < 1) {
     return c.json({ error: "roomId must be a positive integer" }, 400);
@@ -259,10 +253,7 @@ verifyRoutes.post("/deadlock-ordering", async (c) => {
   const dangerousRate = dangerousDeadlockRuns / iterations;
   const safeRate = safeDeadlockRuns / iterations;
 
-  function detailed(
-    settled: PromiseSettledResult<unknown>[] | null,
-    label: string
-  ) {
+  function detailed(settled: PromiseSettledResult<unknown>[] | null, label: string) {
     if (!settled) {
       return { label, txA: {}, txB: {}, anyDeadlock: false };
     }
@@ -283,8 +274,7 @@ verifyRoutes.post("/deadlock-ordering", async (c) => {
     };
   }
 
-  const sfuShowsBenefit =
-    dangerousDeadlockRuns > 0 && safeDeadlockRuns === 0;
+  const sfuShowsBenefit = dangerousDeadlockRuns > 0 && safeDeadlockRuns === 0;
 
   return c.json({
     meta: {
@@ -294,8 +284,7 @@ verifyRoutes.post("/deadlock-ordering", async (c) => {
       iterations,
       txAPattern: "chat_rooms UPDATE → sleep → chat_messages INSERT",
       txBDangerousPattern: "chat_messages INSERT → chat_rooms UPDATE",
-      txBSafePattern:
-        "SELECT FOR UPDATE chat_rooms → chat_messages INSERT → chat_rooms UPDATE",
+      txBSafePattern: "SELECT FOR UPDATE chat_rooms → chat_messages INSERT → chat_rooms UPDATE",
     },
     aggregate: {
       dangerousDeadlockRuns,
@@ -329,10 +318,7 @@ verifyRoutes.post("/deadlock-ordering", async (c) => {
 verifyRoutes.post("/concurrent-trigger-pairs", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const roomId = Number(body.roomId ?? 1);
-  const iterations = Math.min(
-    100,
-    Math.max(1, Math.floor(Number(body.iterations ?? 30)))
-  );
+  const iterations = Math.min(100, Math.max(1, Math.floor(Number(body.iterations ?? 30))));
 
   if (!Number.isFinite(roomId) || roomId < 1) {
     return c.json({ error: "roomId must be a positive integer" }, 400);
@@ -342,27 +328,20 @@ verifyRoutes.post("/concurrent-trigger-pairs", async (c) => {
   let safePairsWithDeadlock = 0;
 
   for (let i = 0; i < iterations; i++) {
-    const [resA, resB] = await Promise.all([
-      runTriggerUnsafe(roomId),
-      runTriggerUnsafe(roomId),
-    ]);
+    const [resA, resB] = await Promise.all([runTriggerUnsafe(roomId), runTriggerUnsafe(roomId)]);
     if (resultsIndicateDeadlock(resA) || resultsIndicateDeadlock(resB)) {
       unsafePairsWithDeadlock += 1;
     }
   }
 
   for (let i = 0; i < iterations; i++) {
-    const [resA, resB] = await Promise.all([
-      runTriggerSafe(roomId),
-      runTriggerSafe(roomId),
-    ]);
+    const [resA, resB] = await Promise.all([runTriggerSafe(roomId), runTriggerSafe(roomId)]);
     if (resultsIndicateDeadlock(resA) || resultsIndicateDeadlock(resB)) {
       safePairsWithDeadlock += 1;
     }
   }
 
-  const verified =
-    unsafePairsWithDeadlock > 0 && safePairsWithDeadlock === 0;
+  const verified = unsafePairsWithDeadlock > 0 && safePairsWithDeadlock === 0;
 
   return c.json({
     meta: {
@@ -373,9 +352,7 @@ verifyRoutes.post("/concurrent-trigger-pairs", async (c) => {
     aggregate: {
       unsafePairsWithAnyDeadlock: unsafePairsWithDeadlock,
       safePairsWithAnyDeadlock: safePairsWithDeadlock,
-      unsafeDeadlockRate: Number(
-        (unsafePairsWithDeadlock / iterations).toFixed(3)
-      ),
+      unsafeDeadlockRate: Number((unsafePairsWithDeadlock / iterations).toFixed(3)),
       safeDeadlockRate: Number((safePairsWithDeadlock / iterations).toFixed(3)),
     },
     conclusion: {

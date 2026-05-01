@@ -24,7 +24,9 @@ console.log("=== Endpoints ===");
 console.log("GET    /                          - ヘルスチェック");
 console.log("POST   /rooms                     - ルーム作成");
 console.log("PATCH  /rooms/:id                 - ルーム属性更新");
-console.log("POST   /messages/bulk             - メッセージ複数作成（子→親順：デッドロック発生しやすい）");
+console.log(
+  "POST   /messages/bulk             - メッセージ複数作成（子→親順：デッドロック発生しやすい）",
+);
 console.log("POST   /messages/bulk-safe         - メッセージ複数作成（親→子順：安全）");
 console.log("POST   /deadlock/trigger          - デッドロックを意図的に再現");
 console.log("POST   /deadlock/trigger-safe     - ロック順序修正済みの比較");

@@ -87,7 +87,7 @@ export async function runTriggerSafe(roomId: number): Promise<string[]> {
 
       results.push("TxA: 完了");
       console.log("[TxA - 安全] 完了");
-    })
+    }),
   ).catch((e: Error) => {
     results.push(`TxA: エラー - ${e.message}`);
     console.error("[TxA - 安全] エラー:", e.message);
@@ -115,7 +115,7 @@ export async function runTriggerSafe(roomId: number): Promise<string[]> {
 
       results.push("TxB: 完了");
       console.log("[TxB - 安全] 完了");
-    })
+    }),
   ).catch((e: Error) => {
     results.push(`TxB: エラー - ${e.message}`);
     console.error("[TxB - 安全] エラー:", e.message);
@@ -127,9 +127,5 @@ export async function runTriggerSafe(roomId: number): Promise<string[]> {
 
 export function resultsIndicateDeadlock(results: string[]): boolean {
   const text = results.join("\n").toLowerCase();
-  return (
-    text.includes("deadlock") ||
-    text.includes("p2034") ||
-    text.includes("write conflict")
-  );
+  return text.includes("deadlock") || text.includes("p2034") || text.includes("write conflict");
 }

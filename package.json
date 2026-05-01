@@ -1,8 +1,10 @@
 {
-  "name": "deadlock-demo",
+  "name": "rdb-deadlock-demo",
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "lint:fix": "biome lint --write .",
+    "format:fix": "biome format --write .",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
@@ -17,6 +19,7 @@
     "hono": "^4.6.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
     "@types/node": "^22.0.0",
     "prisma": "^6.0.0",
     "tsx": "^4.19.0",

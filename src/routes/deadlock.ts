@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import {
-  runTriggerSafe,
-  runTriggerUnsafe,
-} from "../lib/deadlock-trigger-core.js";
+import { runTriggerSafe, runTriggerUnsafe } from "../lib/deadlock-trigger-core.js";
 
 export const deadlockRoutes = new Hono();
 

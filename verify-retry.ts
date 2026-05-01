@@ -8,17 +8,21 @@ async function main() {
   console.log("=== withRetry 単体検証 ===");
   let attempts = 0;
 
-  const result = await withRetry(async () => {
-    attempts++;
-    if (attempts < 2) {
-      const err: Error & { code?: string } = new Error(
-        "Transaction failed due to a write conflict or a deadlock"
-      );
-      err.code = "P2034";
-      throw err;
-    }
-    return "success";
-  }, 3, 50);
+  const result = await withRetry(
+    async () => {
+      attempts++;
+      if (attempts < 2) {
+        const err: Error & { code?: string } = new Error(
+          "Transaction failed due to a write conflict or a deadlock",
+        );
+        err.code = "P2034";
+        throw err;
+      }
+      return "success";
+    },
+    3,
+    50,
+  );
 
   console.log(`結果: ${result}  試行回数: ${attempts}`);
 }
