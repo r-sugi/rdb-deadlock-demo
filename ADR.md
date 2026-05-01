@@ -82,6 +82,15 @@ MySQL InnoDB は外部キー制約の整合性検証のため、`chat_messages` 
 SELECT id FROM chat_rooms WHERE id = ? LOCK IN SHARE MODE
 ```
 
+| 子テーブルへの操作 | 親テーブルへの暗黙 S lock |
+|-------------------|--------------------------|
+| INSERT | **かかる**（親行の存在確認） |
+| 外部キーカラム（roomId）を変更する UPDATE | **かかる**（新しい親行の存在確認） |
+| 外部キー以外のカラムのみ UPDATE | かからない |
+| DELETE | かからない |
+
+本ケースでは主にメッセージ投稿（INSERT）が問題だが、外部キーカラムを変更する UPDATE でも同様の競合が発生しうる点に注意。
+
 ### 2.3 コネクションプールへの波及
 
 ```mermaid
